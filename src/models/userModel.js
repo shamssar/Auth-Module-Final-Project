@@ -1,0 +1,50 @@
+'use strict';
+require("dotenv").config();
+const jwt = require('jsonwebtoken');
+const SECRET = process.env.API_SECRET || "any word";
+
+const usersModel =  (sequelize, DataTypes) => sequelize.define("students", {
+  first_name:  {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique : true,
+},
+  last_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+},
+  email:  {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique : true,
+},
+  password: {
+    type: DataTypes.STRING,
+  allowNull: true,
+  },
+  role: {
+    type: DataTypes.ENUM('user','writer','editor','admin'),
+    defaultValue: 'user',
+  },
+  token: {
+    type: DataTypes.VIRTUAL, 
+},
+
+actions:{
+    type: DataTypes.VIRTUAL,
+    get() {
+        const acl ={
+            user: ['read'],
+            writer: ['read','create'],
+            editor: ['read','create','update'],
+            admin: ['read','create','update','delete']
+        }
+        return acl[this.role];
+    }
+  }      
+});
+
+module.exports = usersModel;
+
+
+
